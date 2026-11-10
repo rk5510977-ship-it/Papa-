@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indian 3D Festival Calendar Pro</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:Arial,"Noto Sans Devanagari",sans-serif;min-height:100vh;color:#fff;padding:16px;
+background:radial-gradient(circle at 8% 0,#ff7b00 0,transparent 27%),radial-gradient(circle at 92% 100%,#7928ca 0,transparent 32%),linear-gradient(135deg,#080016,#16102f,#001b35);
+overflow-x:hidden
+}
+.header{text-align:center;max-width:1250px;margin:auto;padding:12px}
+.logo{font-size:clamp(28px,6vw,50px);font-weight:900;background:linear-gradient(90deg,#ff9933,#fff,#138808);-webkit-background-clip:text;color:transparent}
+.subtitle{color:#ddd;margin-top:6px}
+.controls,.audio{max-width:1250px;margin:14px auto;display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap}
+button,select,input{
+border:1px solid #ffffff2b;outline:none;border-radius:13px;padding:11px 14px;color:#fff;background:#ffffff15;
+backdrop-filter:blur(14px);box-shadow:0 8px 22px #0005
+}
+button{cursor:pointer;font-weight:bold;transition:.25s}
+button:hover{transform:translateY(-2px) scale(1.02);background:#ff993355}
+select option{color:#111}.search{width:220px}.volume{width:150px}
+.calendar{max-width:1250px;margin:auto;padding:20px;border-radius:30px;background:#ffffff0d;backdrop-filter:blur(25px);border:1px solid #ffffff2b;box-shadow:0 30px 70px #0008,inset 0 1px #fff4}
+.month-title{text-align:center;margin-bottom:18px}.month-title h2{font-size:34px}.month-title p{color:#bbb;margin-top:4px}
+.weekdays,.days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.weekdays{margin-bottom:8px}
+.weekdays div{text-align:center;padding:11px 3px;font-weight:bold;border-radius:11px;background:linear-gradient(145deg,#ff9933,#e85d04);box-shadow:0 7px 14px #0005}
+.day{min-height:112px;padding:9px;border-radius:17px;background:linear-gradient(145deg,#ffffff1b,#ffffff08);border:1px solid #ffffff18;box-shadow:8px 8px 18px #0005,inset 1px 1px 5px #ffffff1a;transition:.3s;position:relative;overflow:hidden;cursor:pointer}
+.day:hover{transform:perspective(700px) rotateX(6deg) rotateY(-6deg) translateY(-5px) scale(1.02);box-shadow:14px 20px 32px #0007,0 0 24px #ff993344}
+.empty{opacity:.15;cursor:default}.date{font-size:20px;font-weight:bold}.today{border:2px solid #00eaff;box-shadow:0 0 20px #00eaff,inset 0 0 15px #00eaff22}
+.festival{background:linear-gradient(145deg,#ff993355,#ff006622);border-color:#ffd16699}
+.festival-icon{font-size:28px;margin-top:6px}.festival-name{font-size:11px;margin-top:4px;color:#ffd166;font-weight:bold}
+.sound-tag{font-size:9px;color:#fff9;margin-top:3px}
+.legend{text-align:center;color:#ccc;margin:17px auto}.badge{display:inline-block;padding:7px 11px;margin:3px;border-radius:20px;background:#ffffff12}
+.modal{display:none;position:fixed;inset:0;background:#000b;backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:1000;padding:18px}
+.modal-box{width:min(94%,470px);padding:28px;border-radius:30px;background:linear-gradient(145deg,#ffffff2e,#ffffff0d);border:1px solid #ffffff40;box-shadow:0 30px 80px #000;text-align:center}
+.modal-icon{font-size:68px}.modal h2{margin:8px 0}.greeting{font-size:22px;color:#ffd166;font-weight:bold;margin:12px 0}.close{margin-top:15px;background:#ff4d6d}
+#effects{position:fixed;inset:0;pointer-events:none;z-index:900;overflow:hidden}
+.particle{position:absolute;font-size:28px;animation:fly 1.8s ease-out forwards}
+@keyframes fly{0%{transform:translate(0,0) scale(.4) rotate(0);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(1.5) rotate(720deg);opacity:0}}
+.confetti{position:fixed;top:-20px;width:9px;height:16px;animation:fall 2.5s linear forwards;z-index:950}
+@keyframes fall{to{transform:translateY(110vh) rotate(900deg);opacity:0}}
+.pulse{animation:pulse .8s ease-in-out 2}@keyframes pulse{50%{transform:scale(1.02);filter:brightness(1.35)}}
+.note{max-width:900px;margin:12px auto;text-align:center;color:#aaa;font-size:12px;line-height:1.5}
+@media(max-width:700px){
+body{padding:8px}.calendar{padding:8px;border-radius:20px}.weekdays,.days{gap:4px}.weekdays div{font-size:10px;padding:8px 2px}
+.day{min-height:80px;padding:5px;border-radius:10px}.date{font-size:16px}.festival-icon{font-size:19px}.festival-name{font-size:8px}.sound-tag{font-size:7px}.search{width:180px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+<div class="logo">🇮🇳 Indian 3D Festival Calendar PRO</div>
+<div class="subtitle">🎉 Festival Greeting • 🔊 Voice • 🎆 Animation • 🪔 Indian Celebrations</div>
+</header>
+
+<div class="controls">
+<button onclick="previousMonth()">⬅️ पिछला</button>
+<button onclick="today()">📍 आज</button>
+<button onclick="nextMonth()">अगला ➡️</button>
+<select id="yearSelect" onchange="changeYear()"></select>
+<input class="search" id="search" placeholder="🔍 Festival खोजें..." oninput="renderCalendar()">
+<button onclick="toggleVoice()" id="voiceBtn">🔊 Voice ON</button>
+<button onclick="stopVoice()">⏹️ Stop</button>
+<button onclick="toggleTheme()">🌙 Theme</button>
+</div>
+
+<div class="audio">
+🔉 Voice Volume:
+<input class="volume" id="volume" type="range" min="0" max="1" step=".05" value=".85">
+&nbsp; 🎙️ Voice:
+<select id="voiceLanguage">
+<option value="hi-IN">हिंदी</option>
+<option value="en-IN">English India</option>
+</select>
+</div>
+
+<main class="calendar" id="calendar">
+<div class="month-title"><h2 id="monthName"></h2><p id="yearText"></p></div>
+<div class="weekdays"><div>रवि</div><div>सोम</div><div>मंगल</div><div>बुध</div><div>गुरु</div><div>शुक्र</div><div>शनि</div></div>
+<div class="days" id="days"></div>
+</main>
+
+<div class="legend">
+<span class="badge">🎉 Festival</span><span class="badge">🔊 Click करके Greeting सुनें</span><span class="badge">✨ Animation</span><span class="badge">🇮🇳 India</span>
+</div>
+
+<div class="note">
+नोट: Festival dates साल के अनुसार बदल सकती हैं। यह calendar एक editable festival database इस्तेमाल करता है।
+</div>
+
+<div id="effects"></div>
+
+<div class="modal" id="modal">
+<div class="modal-box">
+<div class="modal-icon" id="modalIcon"></div>
+<h2 id="modalTitle"></h2>
+<p id="modalDate"></p>
+<div class="greeting" id="modalGreeting"></div>
+<p id="modalSound"></p>
+<button class="close" onclick="closeModal()">बंद करें</button>
+</div>
+</div>
+
+<script>
+const months=["जनवरी","फरवरी","मार्च","अप्रैल","मई","जून","जुलाई","अगस्त","सितंबर","अक्टूबर","नवंबर","दिसंबर"];
+
+/* Common Indian festivals.
+   Add more entries using the same format:
+   "MM-DD":{name:"...",icon:"...",greeting:"...",english:"...",effect:"..."}
+*/
+const festivals={
+"01-01":{name:"नव वर्ष",icon:"🎆",greeting:"आप सभी को नव वर्ष की हार्दिक शुभकामनाएँ!",english:"Happy New Year! Wishing you a very happy and prosperous New Year!",effect:"fireworks"},
+"01-13":{name:"लोहड़ी",icon:"🔥",greeting:"आप सभी को लोहड़ी की हार्दिक शुभकामनाएँ!",english:"Happy Lohri! May your life be filled with happiness and prosperity!",effect:"fire"},
+"01-14":{name:"मकर संक्रांति",icon:"🪁",greeting:"आप सभी को मकर संक्रांति की हार्दिक शुभकामनाएँ!",english:"Happy Makar Sankranti! May this festival bring happiness and prosperity!",effect:"kites"},
+"01-26":{name:"गणतंत्र दिवस",icon:"🇮🇳",greeting:"आप सभी को गणतंत्र दिवस की हार्दिक शुभकामनाएँ! जय हिंद!",english:"Happy Republic Day! Jai Hind!",effect:"patriotic"},
+"02-02":{name:"वसंत पंचमी",icon:"🌼",greeting:"आप सभी को वसंत पंचमी की हार्दिक शुभकामनाएँ!",english:"Happy Vasant Panchami! May Goddess Saraswati bless you with knowledge and wisdom!",effect:"flowers"},
+"02-15":{name:"महाशिवरात्रि",icon:"🔱",greeting:"हर हर महादेव! आप सभी को महाशिवरात्रि की हार्दिक शुभकामनाएँ!",english:"Happy Maha Shivratri! Har Har Mahadev!",effect:"temple"},
+"03-03":{name:"होली",icon:"🌈",greeting:"आप सभी को होली की हार्दिक शुभकामनाएँ! Happy Holi!",english:"Happy Holi! May your life be filled with the colors of happiness!",effect:"holi"},
+"03-20":{name:"उगादी / गुड़ी पड़वा",icon:"🌿",greeting:"आप सभी को उगादी और गुड़ी पड़वा की हार्दिक शुभकामनाएँ!",english:"Happy Ugadi and Gudi Padwa! May the new year bring happiness and prosperity!",effect:"flowers"},
+"03-31":{name:"ईद-उल-फितर",icon:"🌙",greeting:"आप सभी को ईद मुबारक! ईद-उल-फितर की हार्दिक शुभकामनाएँ!",english:"Eid Mubarak! Wishing you peace, happiness and prosperity!",effect:"crescent"},
+"04-14":{name:"बैसाखी",icon:"🌾",greeting:"आप सभी को बैसाखी की हार्दिक शुभकामनाएँ!",english:"Happy Baisakhi! May this harvest festival bring joy and prosperity!",effect:"celebrate"},
+"04-14":{name:"अंबेडकर जयंती",icon:"📘",greeting:"डॉ. भीमराव अंबेडकर जयंती की हार्दिक शुभकामनाएँ!",english:"Warm wishes on Dr. B. R. Ambedkar Jayanti!",effect:"patriotic"},
+"04-30":{name:"अक्षय तृतीया",icon:"✨",greeting:"आप सभी को अक्षय तृतीया की हार्दिक शुभकामनाएँ!",english:"Happy Akshaya Tritiya! May prosperity and happiness always be with you!",effect:"gold"},
+"05-01":{name:"मजदूर दिवस",icon:"🛠️",greeting:"आप सभी को मजदूर दिवस की हार्दिक शुभकामनाएँ!",english:"Happy Labour Day! Salute to every worker!",effect:"celebrate"},
+"06-27":{name:"ईद-उल-अजहा",icon:"🌙",greeting:"आप सभी को ईद-उल-अजहा की दिली मुबारकबाद!",english:"Eid Mubarak! Wishing you peace and happiness!",effect:"crescent"},
+"07-16":{name:"रथ यात्रा",icon:"🛕",greeting:"आप सभी को भगवान जगन्नाथ रथ यात्रा की हार्दिक शुभकामनाएँ!",english:"Happy Rath Yatra! Jai Jagannath!",effect:"temple"},
+"08-15":{name:"स्वतंत्रता दिवस",icon:"🇮🇳",greeting:"आप सभी को स्वतंत्रता दिवस की हार्दिक शुभकामनाएँ! जय हिंद! वंदे मातरम्!",english:"Happy Independence Day! Jai Hind! Vande Mataram!",effect:"patriotic"},
+"08-28":{name:"जन्माष्टमी",icon:"🦚",greeting:"नंद के आनंद भयो, जय कन्हैया लाल की! जन्माष्टमी की शुभकामनाएँ!",english:"Happy Janmashtami! Jai Shri Krishna!",effect:"flute"},
+"09-04":{name:"गणेश चतुर्थी",icon:"🐘",greeting:"गणपति बप्पा मोरया! आप सभी को गणेश चतुर्थी की शुभकामनाएँ!",english:"Happy Ganesh Chaturthi! Ganpati Bappa Morya!",effect:"ganesh"},
+"09-14":{name:"ओणम",icon:"🌸",greeting:"आप सभी को ओणम की हार्दिक शुभकामनाएँ!",english:"Happy Onam! May your home be filled with happiness and prosperity!",effect:"flowers"},
+"09-17":{name:"विश्वकर्मा पूजा",icon:"⚙️",greeting:"आप सभी को विश्वकर्मा पूजा की हार्दिक शुभकामनाएँ!",english:"Happy Vishwakarma Puja!",effect:"celebrate"},
+"10-02":{name:"गांधी जयंती",icon:"🕊️",greeting:"गांधी जयंती की हार्दिक शुभकामनाएँ। सत्य और अहिंसा का संदेश फैलाएँ।",english:"Warm wishes on Gandhi Jayanti. Let us remember the message of truth and non-violence.",effect:"patriotic"},
+"10-20":{name:"दशहरा",icon:"🏹",greeting:"आप सभी को विजयादशमी और दशहरा की हार्दिक शुभकामनाएँ!",english:"Happy Dussehra! May good always triumph over evil!",effect:"dussehra"},
+"10-29":{name:"धनतेरस",icon:"🪙",greeting:"आप सभी को धनतेरस की हार्दिक शुभकामनाएँ!",english:"Happy Dhanteras! May your life be filled with health, wealth and happiness!",effect:"gold"},
+"11-01":{name:"करवा चौथ",icon:"🌙",greeting:"आप सभी को करवा चौथ की हार्दिक शुभकामनाएँ!",english:"Happy Karwa Chauth! Wishing love and happiness to all couples!",effect:"crescent"},
+"11-08":{name:"दीपावली",icon:"🪔",greeting:"आप सभी को दीपावली की हार्दिक शुभकामनाएँ! Happy Diwali!",english:"Happy Diwali! May the festival of lights fill your life with happiness, peace and prosperity!",effect:"fireworks"},
+"11-09":{name:"गोवर्धन पूजा",icon:"⛰️",greeting:"आप सभी को गोवर्धन पूजा की हार्दिक शुभकामनाएँ!",english:"Happy Govardhan Puja! Jai Shri Krishna!",effect:"temple"},
+"11-10":{name:"भाई दूज",icon:"🎁",greeting:"आप सभी को भाई दूज की हार्दिक शुभकामनाएँ!",english:"Happy Bhai Dooj! Wishing brothers and sisters love and happiness!",effect:"celebrate"},
+"11-24":{name:"गुरु नानक जयंती",icon:"🙏",greeting:"गुरु नानक देव जी के प्रकाश पर्व की हार्दिक शुभकामनाएँ!",english:"Happy Guru Nanak Jayanti! May Waheguru bless everyone with peace and happiness!",effect:"gold"},
+"12-25":{name:"क्रिसमस",icon:"🎄",greeting:"आप सभी को क्रिसमस की हार्दिक शुभकामनाएँ! Merry Christmas!",english:"Merry Christmas! Wishing you love, joy and peace!",effect:"snow"}
+};
+
+let currentDate=new Date(),currentMonth=currentDate.getMonth(),currentYear=currentDate.getFullYear(),voiceOn=true;
+const yearSelect=document.getElementById("yearSelect");
+for(let y=2020;y<=2050;y++){let o=document.createElement("option");o.value=y;o.textContent=y;yearSelect.appendChild(o)}
+yearSelect.value=currentYear;
+
+function renderCalendar(){
+const box=document.getElementById("days");box.innerHTML="";
+document.getElementById("monthName").textContent=months[currentMonth];
+document.getElementById("yearText").textContent="भारत • "+currentYear;
+const first=new Date(currentYear,currentMonth,1).getDay(),total=new Date(currentYear,currentMonth+1,0).getDate();
+for(let i=0;i<first;i++){let e=document.createElement("div");e.className="day empty";box.appendChild(e)}
+for(let d=1;d<=total;d++){
+let day=document.createElement("div");day.className="day";
+let key=String(currentMonth+1).padStart(2,"0")+"-"+String(d).padStart(2,"0"),f=festivals[key];
+let date=document.createElement("div");date.className="date";date.textContent=d;day.appendChild(date);
+let now=new Date();if(d===now.getDate()&&currentMonth===now.getMonth()&&currentYear===now.getFullYear())day.classList.add("today");
+if(f){
+let s=document.getElementById("search").value.toLowerCase();
+if(s&&!f.name.toLowerCase().includes(s))day.style.display="none";
+day.classList.add("festival");
+let icon=document.createElement("div");icon.className="festival-icon";icon.textContent=f.icon;day.appendChild(icon);
+let name=document.createElement("div");name.className="festival-name";name.textContent=f.name;day.appendChild(name);
+let tag=document.createElement("div");tag.className="sound-tag";tag.textContent="🔊 सुनने के लिए क्लिक";day.appendChild(tag);
+day.onclick=()=>festivalClick(f,d);
+}
+box.appendChild(day);
+}}
+
+function festivalClick(f,d){
+showGreeting(f);
+if(voiceOn)speakGreeting(f);
+effects(f.effect);
+document.getElementById("calendar").classList.remove("pulse");void document.getElementById("calendar").offsetWidth;document.getElementById("calendar").classList.add("pulse");
+}
+
+function showGreeting(f){
+document.getElementById("modalIcon").textContent=f.icon;
+document.getElementById("modalTitle").textContent=f.name;
+document.getElementById("modalDate").textContent="📅 "+arguments[1]+" "+months[currentMonth]+" "+currentYear;
+document.getElementById("modalGreeting").textContent=f.greeting;
+document.getElementById("modalSound").textContent="🔊 Greeting voice चल रही है...";
+document.getElementById("modal").style.display="flex";
+}
+
+function speakGreeting(f){
+if(!("speechSynthesis" in window)){document.getElementById("modalSound").textContent="इस browser में Voice Speech उपलब्ध नहीं है।";return}
+speechSynthesis.cancel();
+let lang=document.getElementById("voiceLanguage").value;
+let text=lang==="hi-IN"?f.greeting:f.english;
+let u=new SpeechSynthesisUtterance(text);u.lang=lang;u.volume=parseFloat(document.getElementById("volume").value);u.rate=.88;u.pitch=1.03;
+u.onend=()=>document.getElementById("modalSound").textContent="✅ Greeting पूरी हो गई";
+speechSynthesis.speak(u);
+}
+function stopVoice(){if("speechSynthesis" in window)speechSynthesis.cancel()}
+function toggleVoice(){voiceOn=!voiceOn;document.getElementById("voiceBtn").textContent=voiceOn?"🔊 Voice ON":"🔇 Voice OFF";if(!voiceOn)stopVoice()}
+function closeModal(){document.getElementById("modal").style.display="none";stopVoice()}
+
+function effects(type){
+const wrap=document.getElementById("effects");wrap.innerHTML="";
+let icons={
+fireworks:["🎆","✨","💥"],fire:["🔥","✨","🪔"],kites:["🪁","✨","🎉"],patriotic:["🇮🇳","✨","🎉"],
+temple:["🔔","✨","🪔"],flute:["🦚","🎵","✨"],ganesh:["🐘","🪔","✨"],holi:["🌈","🎨","🎉"],
+flowers:["🌸","🌼","✨"],crescent:["🌙","✨","⭐"],dussehra:["🏹","🔥","✨"],gold:["🪙","✨","💫"],
+celebrate:["🎉","✨","🌟"],snow:["❄️","🎄","✨"]
+}[type]||["🎉","✨","🌟"];
+for(let i=0;i<26;i++){let p=document.createElement("div");p.className="particle";p.textContent=icons[i%icons.length];p.style.left="50%";p.style.top="45%";p.style.setProperty("--x",(Math.random()*90-45)+"vw");p.style.setProperty("--y",(Math.random()*70-35)+"vh");p.style.animationDelay=(Math.random()*.25)+"s";wrap.appendChild(p)}
+if(type==="patriotic"||type==="holi"||type==="fireworks"){for(let i=0;i<45;i++){let c=document.createElement("div");c.className="confetti";c.style.left=Math.random()*100+"vw";c.style.animationDelay=Math.random()+"s";c.style.background=["#ff9933","#fff","#138808","#ff1493","#00e5ff"][i%5];wrap.appendChild(c)}}
+setTimeout(()=>wrap.innerHTML="",3200);
+}
+
+function previousMonth(){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--}yearSelect.value=currentYear;renderCalendar()}
+function nextMonth(){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++}yearSelect.value=currentYear;renderCalendar()}
+function today(){let n=new Date();currentMonth=n.getMonth();currentYear=n.getFullYear();yearSelect.value=currentYear;renderCalendar()}
+function changeYear(){currentYear=parseInt(yearSelect.value);renderCalendar()}
+function toggleTheme(){document.body.style.background=document.body.style.background.includes("#fff1e6")?"radial-gradient(circle at 8% 0,#ff7b00 0,transparent 27%),radial-gradient(circle at 92% 100%,#7928ca 0,transparent 32%),linear-gradient(135deg,#080016,#16102f,#001b35)":"linear-gradient(135deg,#fff1e6,#e8f8ff,#eee8ff)"}
+
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+renderCalendar();
+</script>
+</body>
+</html>
